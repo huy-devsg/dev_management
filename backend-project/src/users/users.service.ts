@@ -14,7 +14,6 @@ export class UsersService {
     gender: true,
     role: true,
     desc: true,
-    language: true,
   };
   private async handleUser(
     id: number | undefined,
@@ -86,7 +85,8 @@ export class UsersService {
           is_delete: false,
         },
 
-        include: {
+        select: {
+          ...this.selectInfoUser,
           user_language: {
             include: {
               language: true,
@@ -106,7 +106,8 @@ export class UsersService {
           user_id: userId,
           is_delete: false,
         },
-        include: {
+        select: {
+          ...this.selectInfoUser,
           user_language: {
             include: {
               language: true,
