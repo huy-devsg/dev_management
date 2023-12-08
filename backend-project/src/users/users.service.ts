@@ -140,7 +140,6 @@ export class UsersService {
       throw new Error();
     }
   }
-
   async updateUser(id: number, body: UpdateUserDto) {
     try {
       const data = await this.handleUser(id, body);
