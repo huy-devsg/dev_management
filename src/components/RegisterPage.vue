@@ -19,6 +19,15 @@
               placeholder="Enter a valid email address"
               v-model="userForm.email"
             />
+            <span
+              class="span-noti"
+              v-if="$v.userForm.email.$dirty && !$v.userForm.email.required"
+            >
+              Email is not empty</span
+            >
+            <span class="span-noti" v-else-if="!$v.userForm.email.email">
+              Email must be valid</span
+            >
           </div>
           <label class="form-label">Full Name :</label>
           <div class="form-outline mb-4">
@@ -28,6 +37,14 @@
               placeholder="Enter a valid full name"
               v-model="userForm.full_name"
             />
+            <span
+              class="span-noti"
+              v-if="
+                $v.userForm.full_name.$dirty && !$v.userForm.full_name.required
+              "
+            >
+              Full name is not empty
+            </span>
           </div>
 
           <label class="form-label">Password :</label>
@@ -38,6 +55,14 @@
               placeholder="Enter password"
               v-model="userForm.password"
             />
+            <span
+              class="span-noti"
+              v-if="
+                $v.userForm.password.$dirty && !$v.userForm.password.required
+              "
+            >
+              Password is not empty
+            </span>
           </div>
 
           <label class="form-label">Avatar :</label>
@@ -48,8 +73,13 @@
               placeholder="Enter avatar link"
               v-model="userForm.avatar"
             />
+            <span
+              class="span-noti"
+              v-if="$v.userForm.avatar.$dirty && !$v.userForm.avatar.required"
+            >
+              Avatar is not empty</span
+            >
           </div>
-
           <label for="">Gender : </label>
           <div class="d-flex">
             <div class="form-check mr-3">
@@ -59,9 +89,10 @@
                   class="form-check-input"
                   name="gender"
                   value="Male"
-                  v-model="userForm.gender" />
-                Male <i class="input-helper"></i
-              ></label>
+                  v-model="userForm.gender"
+                />
+                Male <i class="input-helper"></i>
+              </label>
             </div>
             <div class="form-check mr-3">
               <label class="form-check-label">
@@ -75,6 +106,12 @@
               ></label>
             </div>
           </div>
+          <span
+            class="span-noti"
+            v-if="$v.userForm.gender.$dirty && !$v.userForm.gender.required"
+          >
+            Gender is not empty
+          </span>
           <div class="text-center text-lg-start mt-4 pt-2">
             <button
               type="button"
@@ -98,6 +135,8 @@
 <script>
 import authMixin from '@/mixins/authMixin'
 import { registerUserApi } from '@/apis/auth'
+import { required, email } from 'vuelidate/lib/validators'
+
 export default {
   data() {
     return {
@@ -110,17 +149,32 @@ export default {
       },
     }
   },
-
+  validations: {
+    userForm: {
+      email: { email, required },
+      full_name: {
+        required,
+      },
+      avatar: {
+        required,
+      },
+      gender: { required },
+      password: { required },
+    },
+  },
   mixins: [authMixin],
   methods: {
     async handleRegister() {
-      if (confirm('Comfirm register ?')) {
-        const register = await registerUserApi(this.userForm)
-        if (register) {
-          alert('Register success')
-          this.$router.push('/')
-        } else {
-          alert('Register failed')
+      this.$v.userForm.$touch()
+      if (!this.$v.userForm.$invalid) {
+        if (confirm('Comfirm register ?')) {
+          const register = await registerUserApi(this.userForm)
+          if (register) {
+            alert('Register success')
+            this.$router.push('/')
+          } else {
+            alert('Register failed')
+          }
         }
       }
     },

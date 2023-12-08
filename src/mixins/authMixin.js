@@ -25,7 +25,11 @@ export default {
       }
     },
     redirectToLogin() {
-      if (this.$route.path !== '/login' && this.$route.path !== '/register') {
+      if (
+        this.$route.path !== '/login' &&
+        this.$route.path !== '/register' &&
+        this.$route.path !== '/reset-password'
+      ) {
         this.$router.push('/login')
       }
     },

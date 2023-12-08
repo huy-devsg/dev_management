@@ -9,7 +9,7 @@
         ><h2>VueProject</h2></router-link
       >
       <router-link class="navbar-brand brand-logo-mini" to="/"
-        ><img src="assets/images/logo-mini.svg" alt="logo"
+        ><img src="../../public/assets/images/logo-mini.svg" alt="logo"
       /></router-link>
     </div>
     <div class="navbar-menu-wrapper d-flex align-items-stretch">
@@ -91,7 +91,7 @@
             <router-link to="#" class="dropdown-item preview-item">
               <div class="preview-thumbnail">
                 <img
-                  src="assets/images/faces/face4.jpg"
+                  src="../../public/assets/images/faces/face4.jpg"
                   alt="image"
                   class="profile-pic"
                 />
@@ -109,7 +109,7 @@
             <router-link to="#" class="dropdown-item preview-item">
               <div class="preview-thumbnail">
                 <img
-                  src="assets/images/faces/face2.jpg"
+                  src="../../public/assets/images/faces/face2.jpg"
                   alt="image"
                   class="profile-pic"
                 />
@@ -127,7 +127,7 @@
             <router-link to="#" class="dropdown-item preview-item">
               <div class="preview-thumbnail">
                 <img
-                  src="assets/images/faces/face3.jpg"
+                  src="../../public/assets/images/faces/face3.jpg"
                   alt="image"
                   class="profile-pic"
                 />
@@ -251,11 +251,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { RouterLink } from 'vue-router'
 export default {
-  components: {
-    RouterLink,
-  },
   computed: {
     ...mapGetters(['getIsLogin', 'getUser']),
   },

@@ -1,4 +1,6 @@
 import { registerUserApi } from '@/apis/auth'
+import Vue from 'vue'
+import Vuex from 'vuex'
 import {
   createUserApi,
   getAllUserApi,
@@ -6,9 +8,10 @@ import {
   removeUserApi,
   updateUserApi,
 } from '@/apis/users'
-import { createStore } from 'vuex'
 
-const store = createStore({
+Vue.use(Vuex)
+
+export default new Vuex.Store({
   state: {
     userList: [],
     isModalOpen: false,
@@ -26,7 +29,6 @@ const store = createStore({
     },
     SET_USER_ID(state, payload) {
       state.user = payload
-      console.log('state.user: ', state.user)
     },
     ADD_USER(state, payload) {
       if (payload.data) {
@@ -59,7 +61,6 @@ const store = createStore({
     },
     async setUser({ commit }, userId) {
       const data = await getUserById(userId)
-      console.log('data: ', data)
       commit('SET_USER_ID', data)
     },
     openModal({ commit }) {
@@ -131,5 +132,3 @@ const store = createStore({
     getUser: (state) => state.user,
   },
 })
-
-export default store

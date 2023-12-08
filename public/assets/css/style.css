@@ -2317,7 +2317,10 @@ body {
 [tabindex='-1']:focus:not(:focus-visible) {
   outline: 0 !important;
 }
-
+.span-noti {
+  color: #ff6666;
+  font-size: 12px;
+}
 hr {
   -webkit-box-sizing: content-box;
   box-sizing: content-box;
