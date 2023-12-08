@@ -22,6 +22,16 @@
               placeholder="Enter a valid email address"
               v-model="user.email"
             />
+
+            <span
+              class="span-noti"
+              v-if="$v.user.email.$dirty && !$v.user.email.required"
+            >
+              Email is not empty</span
+            >
+            <span class="span-noti" v-else-if="!$v.user.email.email">
+              Email must be valid</span
+            >
           </div>
 
           <!-- Password input -->
@@ -34,6 +44,12 @@
               placeholder="Enter password"
               v-model="user.password"
             />
+            <span
+              class="span-noti"
+              v-if="$v.user.password.$dirty && !$v.user.password.required"
+            >
+              Password is not empty</span
+            >
           </div>
 
           <div class="d-flex justify-content-between align-items-center">
@@ -45,11 +61,14 @@
                 value=""
                 id="form2Example3"
               />
+
               <label class="form-check-label" for="form2Example3">
                 Remember me
               </label>
             </div>
-            <router-link to="#" class="text-body">Forgot password?</router-link>
+            <router-link to="/reset-password" class="text-body"
+              >Forgot password?</router-link
+            >
           </div>
 
           <div class="text-center text-lg-start mt-4 pt-2">
@@ -74,9 +93,11 @@
 </template>
 <script>
 import { mapActions } from 'vuex'
-import { userLoginApi } from '../apis/auth.js'
 import authMixin from '../mixins/authMixin.js'
 import { jwtDecode } from 'jwt-decode'
+import { userLoginApi } from '../apis/auth.js'
+
+import { required, email } from 'vuelidate/lib/validators'
 
 export default {
   data() {
@@ -87,24 +108,31 @@ export default {
       },
     }
   },
-
+  validations: {
+    user: {
+      email: { email, required },
+      password: { required },
+    },
+  },
   mixins: [authMixin],
-
   methods: {
     ...mapActions(['setLogin', 'setUser']),
+
     async handleLogin() {
-      const login = await userLoginApi(this.user)
-      if (login) {
-        alert('Login success')
-        const accessToken = localStorage.getItem('accessToken')
-        const decode = jwtDecode(accessToken)
-        const { user_id } = decode.data
-        this.setLogin(true)
-        this.setUser(user_id)
-        this.$router.push('/')
-      } else {
-        alert('Login failed')
-        this.setLogin(false)
+      this.$v.user.$touch()
+      if (!this.$v.user.$invalid) {
+        const login = await userLoginApi(this.user)
+        if (login) {
+          alert('Login success')
+          const accessToken = localStorage.getItem('accessToken')
+          const decode = jwtDecode(accessToken)
+          const { user_id } = decode.data
+          this.setLogin(true)
+          this.setUser(user_id)
+          this.$router.push('/')
+        } else {
+          alert('Login failed')
+        }
       }
     },
   },

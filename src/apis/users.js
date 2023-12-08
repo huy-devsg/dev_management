@@ -60,3 +60,18 @@ export const updateUserApi = async (user) => {
     throw new Error(error)
   }
 }
+
+export const updatePassApi = async (user) => {
+  try {
+    const res = await axios({
+      method: 'PATCH',
+      url: `http://localhost:3000/users/reset-password`,
+      data: user,
+    })
+    console.log('res: ', res)
+
+    // return res.data
+  } catch (error) {
+    throw new Error(error)
+  }
+}

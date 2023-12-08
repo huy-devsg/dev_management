@@ -11,7 +11,16 @@
             placeholder="Email"
             v-model="userForm.email"
           />
-          <span>Thông báo</span>
+
+          <span
+            class="span-noti"
+            v-if="$v.userForm.email.$dirty && !$v.userForm.email.required"
+          >
+            Email is not empty</span
+          >
+          <span class="span-noti" v-else-if="!$v.userForm.email.email">
+            Email must be valid</span
+          >
         </div>
         <div class="form-group">
           <label for="age">Full Name</label>
@@ -22,6 +31,14 @@
             placeholder="Full Name"
             v-model="userForm.full_name"
           />
+          <span
+            class="span-noti"
+            v-if="
+              $v.userForm.full_name.$dirty && !$v.userForm.full_name.required
+            "
+          >
+            Full name is not empty
+          </span>
         </div>
         <div class="form-group">
           <label for="avatar">Avatar</label>
@@ -32,6 +49,12 @@
             placeholder="avatar"
             v-model="userForm.avatar"
           />
+          <span
+            class="span-noti"
+            v-if="$v.userForm.avatar.$dirty && !$v.userForm.avatar.required"
+          >
+            Avatar is not empty</span
+          >
         </div>
         <div class="form-group">
           <label for="">Programming Language : </label>
@@ -144,6 +167,12 @@
               ></label>
             </div>
           </div>
+          <span
+            class="span-noti"
+            v-if="$v.userForm.gender.$dirty && !$v.userForm.gender.required"
+          >
+            Gender is not empty
+          </span>
         </div>
         <div class="form-group row">
           <label class="col-sm-3 col-form-label">Role User : </label>
@@ -153,6 +182,12 @@
               <option value="client">Client</option>
             </select>
           </div>
+          <span
+            class="span-noti"
+            v-if="$v.userForm.role.$dirty && !$v.userForm.role.required"
+          >
+            Role is not empty
+          </span>
         </div>
         <div class="form-group">
           <label for="description">Description</label>
@@ -179,6 +214,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { required, email } from 'vuelidate/lib/validators'
 
 export default {
   data() {
@@ -194,22 +230,38 @@ export default {
       },
     }
   },
+  validations: {
+    userForm: {
+      email: { email, required },
+      full_name: {
+        required,
+      },
+      avatar: {
+        required,
+      },
+      gender: { required },
+      role: { required },
+    },
+  },
   computed: {
     ...mapGetters(['getUserEdit']),
   },
   methods: {
     submitForm() {
-      if (this.getUserEdit) {
-        if (confirm('Bạn chắc chắn muốn cập nhật thông tin user ?')) {
-          this.handleUpdateUser(this.userForm)
-          this.resetForm()
-          this.openModal()
-        }
-      } else {
-        if (confirm('Bạn chắc chắn muốn thêm user ?')) {
-          this.handleAddUser(this.userForm)
-          this.resetForm()
-          this.openModal()
+      this.$v.userForm.$touch()
+      if (!this.$v.userForm.$invalid) {
+        if (this.getUserEdit) {
+          if (confirm('Bạn chắc chắn muốn cập nhật thông tin user ?')) {
+            this.handleUpdateUser(this.userForm)
+            this.resetForm()
+            this.openModal()
+          }
+        } else {
+          if (confirm('Bạn chắc chắn muốn thêm user ?')) {
+            this.handleAddUser(this.userForm)
+            this.resetForm()
+            this.openModal()
+          }
         }
       }
     },
