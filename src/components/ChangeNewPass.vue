@@ -10,10 +10,10 @@
       </div>
       <div class="col-md-8 col-lg-6 col-xl-5 offset-xl-1">
         <form>
-          <h2 class="text-center">RESET PASSWORD</h2>
+          <h2 class="text-center">NEW PASSWORD</h2>
 
           <!-- Email input -->
-          <label class="form-label">Password :</label>
+          <label class="form-label">New Password :</label>
           <div class="form-outline mb-4">
             <input
               type="password"
@@ -71,15 +71,14 @@
 </template>
 <script>
 import { jwtDecode } from 'jwt-decode'
-// import authMixin from '../mixins/authMixin.js'
-
 import { required, sameAs } from 'vuelidate/lib/validators'
 import { updatePassApi } from '@/apis/users'
 
 export default {
   data() {
     return {
-      token: '',
+      checkTime: false,
+      userDecode: '',
       user: {
         password: '',
         rePassword: '',
@@ -87,8 +86,46 @@ export default {
     }
   },
   mounted() {
-    const token = this.$route.query.token
-    this.token = token
+    this.checkToken()
+  },
+  methods: {
+    checkToken() {
+      const token = this.$route.query.token
+      if (!token) {
+        this.redirectToErrorPage()
+        return
+      }
+
+      try {
+        this.userDecode = jwtDecode(token)
+        const currentTime = Math.floor(Date.now() / 1000)
+        const expirationTime = this.userDecode.exp
+
+        if (expirationTime < currentTime) {
+          this.redirectToErrorPage()
+        }
+      } catch (error) {
+        this.redirectToErrorPage()
+      }
+    },
+    redirectToErrorPage() {
+      this.$router.push('/404')
+    },
+    async handleReset() {
+      this.$v.user.$touch()
+      if (!this.$v.user.$invalid) {
+        const { user_id } = this.userDecode.data
+        const user = {
+          user_id,
+          password: this.user.password,
+        }
+        const update = updatePassApi(user)
+        if (update) {
+          alert('Updated password successly!')
+          this.$router.push('/login')
+        }
+      }
+    },
   },
   validations: {
     user: {
@@ -97,22 +134,6 @@ export default {
         required,
         sameAsPassword: sameAs('password'),
       },
-    },
-  },
-  //   mixins: [authMixin],
-  methods: {
-    async handleReset() {
-      this.$v.user.$touch()
-      if (!this.$v.user.$invalid) {
-        const decode = jwtDecode(this.token)
-        console.log('decode.data: ', decode.data)
-        const { user_id } = decode.data
-        const user = {
-          user_id,
-          password: this.user.password,
-        }
-        updatePassApi(user)
-      }
     },
   },
 }

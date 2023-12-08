@@ -5,7 +5,7 @@ export const sendMailReset = async (body) => {
       'http://localhost:3000/reset-password/send',
       body
     )
-    data.status === 201 ? true : false
+    return data.data.status === 200 ? true : false
   } catch {
     throw Error()
   }

@@ -68,9 +68,7 @@ export const updatePassApi = async (user) => {
       url: `http://localhost:3000/users/reset-password`,
       data: user,
     })
-    console.log('res: ', res)
-
-    // return res.data
+    return res.data.status === 200 ? true : false
   } catch (error) {
     throw new Error(error)
   }

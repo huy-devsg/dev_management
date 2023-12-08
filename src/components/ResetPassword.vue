@@ -76,11 +76,11 @@ export default {
     async handleReset() {
       this.$v.user.$touch()
       if (!this.$v.user.$invalid) {
-        const send = sendMailReset(this.user)
+        const send = await sendMailReset(this.user)
         if (send) {
           alert('Send email successly!')
         } else {
-          alert('Send email failed!')
+          alert('Email does not exist')
         }
       }
     },
