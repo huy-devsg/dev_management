@@ -9,14 +9,6 @@ export class MailController {
 
   @Post('send')
   async sendEmail(@Body() body: CreateMailDto): Promise<any> {
-    try {
-      await this.mailService.sendEmail(body);
-    } catch (error) {
-      return `Failed to send email: ${error.message}`;
-    }
-  }
-  @Get()
-  getToken(@Query() token: string) {
-    return this.mailService.getToken(token);
+    return await this.mailService.sendEmail(body);
   }
 }

@@ -26,11 +26,10 @@ export class MailService {
         const token = this.jwtService.sign(
           { data: { user_id: user.user_id, email } },
           {
-            expiresIn: this.configService.get('EXPIRES_IN'),
+            expiresIn: this.configService.get('EXPIRES_IN_RESET'),
             secret: this.configService.get('SECRET_KEY_RESET'),
           },
         );
-        console.log('token: ', token);
         const text = `Dear ${email},
 
         We received a request to reset your password for your account. Please click on the link below to set up a new password:
@@ -47,20 +46,17 @@ export class MailService {
         };
         await this.mailerService.sendMail(emailOptions);
         return {
-          status: 201,
-          message: 'Email sent successfully!',
+          status: 200,
+          message: 'Send mail successly!',
         };
       } else {
         return {
           status: 400,
-          message: 'Email address is not available',
+          message: 'Send mail failed!',
         };
       }
     } catch (error) {
       throw new Error(`Failed to send email: ${error.message}`);
     }
-  }
-  getToken(token: string) {
-    console.log(token);
   }
 }

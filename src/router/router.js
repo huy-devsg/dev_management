@@ -6,6 +6,7 @@ import TheDashboard from '@/components/TheDashboard.vue'
 import RegisterPage from '@/components/RegisterPage.vue'
 import ResetPassword from '@/components/ResetPassword.vue'
 import ChangeNewPass from '@/components/ChangeNewPass.vue'
+import ErrorPage from '@/components/ErrorPage.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -31,6 +32,14 @@ const routes = [
       { path: '', component: ResetPassword },
       { path: 'new', component: ChangeNewPass },
     ],
+  },
+  {
+    path: '*',
+    component: ErrorPage,
+  },
+  {
+    path: '/404',
+    component: ErrorPage,
   },
 ]
 
