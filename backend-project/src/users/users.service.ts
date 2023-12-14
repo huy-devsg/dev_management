@@ -94,11 +94,7 @@ export class UsersService {
         where: {
           is_delete: false,
         },
-<<<<<<< HEAD
 
-        select: {
-          ...this.selectInfoUser,
-=======
         select: {
           email: true,
           full_name: true,
@@ -106,7 +102,6 @@ export class UsersService {
           gender: true,
           role: true,
           desc: true,
->>>>>>> master
           user_language: {
             include: {
               language: true,
@@ -127,16 +122,12 @@ export class UsersService {
           is_delete: false,
         },
         select: {
-<<<<<<< HEAD
-          ...this.selectInfoUser,
-=======
           email: true,
           full_name: true,
           avatar: true,
           gender: true,
           role: true,
           desc: true,
->>>>>>> master
           user_language: {
             include: {
               language: true,
