@@ -24,7 +24,6 @@ export class UsersService {
     gender: true,
     role: true,
     desc: true,
-    language: true,
   };
   private async handleUser(
     id: number | undefined,
@@ -95,6 +94,7 @@ export class UsersService {
         where: {
           is_delete: false,
         },
+
         select: {
           email: true,
           full_name: true,
