@@ -8,16 +8,17 @@ datasource db {
 }
 
 model users {
-  user_id       Int             @id @default(autoincrement())
-  email         String?         @db.VarChar(255)
-  full_name     String?         @db.VarChar(255)
-  avatar        String?         @db.VarChar(255)
-  password      String?         @db.VarChar(255)
-  gender        String?         @db.VarChar(255)
-  role          String?         @default("client") @db.VarChar(255)
-  desc          String?         @db.VarChar(255)
-  is_delete     Boolean?        @default(false)
-  user_language user_language[]
+  user_id             Int                  @id @default(autoincrement())
+  email               String?              @db.VarChar(255)
+  full_name           String?              @db.VarChar(255)
+  avatar              String?              @db.VarChar(255)
+  password            String?              @db.VarChar(255)
+  gender              Boolean?
+  role                String?              @default("client") @db.VarChar(255)
+  desc                String?              @db.VarChar(255)
+  is_delete           Boolean?             @default(false)
+  user_language       user_language[]
+  user_reset_password user_reset_password?
 }
 
 model language {
@@ -35,4 +36,11 @@ model user_language {
 
   @@index([language_id], map: "language_id")
   @@index([user_id], map: "user_id")
+}
+
+model user_reset_password {
+  user_id   Int       @id
+  is_update Boolean?
+  updateAt  DateTime? @db.DateTime(0)
+  users     users     @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "user_reset_password_ibfk_1")
 }

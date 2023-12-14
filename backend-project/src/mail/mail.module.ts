@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [

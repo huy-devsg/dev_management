@@ -1,9 +1,11 @@
-import { Controller, Post, Query, Get } from '@nestjs/common';
+import { Controller, Post, Query, Get, UseGuards } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { CreateMailDto } from './dto/create-mail.dto';
 import { Body } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('reset-password')
+@ApiTags('Reset Password')
+@Controller('api/ResetPassword')
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 

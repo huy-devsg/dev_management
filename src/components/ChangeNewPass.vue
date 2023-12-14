@@ -9,7 +9,7 @@
         />
       </div>
       <div class="col-md-8 col-lg-6 col-xl-5 offset-xl-1">
-        <form>
+        <form v-if="token">
           <h2 class="text-center">NEW PASSWORD</h2>
 
           <!-- Email input -->
@@ -19,15 +19,21 @@
               type="password"
               class="form-control form-control-lg"
               placeholder="Enter your new password"
-              v-model="user.password"
+              v-model="password"
             />
 
             <span
               class="span-noti"
-              v-if="$v.user.password.$dirty && !$v.user.password.required"
+              v-if="$v.password.$dirty && !$v.password.required"
             >
               Password is not empty</span
             >
+            <span
+              class="span-noti"
+              v-else-if="!$v.password.maxLength || !$v.password.minLength"
+            >
+              Password must be from 8 to 15 characters
+            </span>
           </div>
           <label class="form-label">Re Password :</label>
           <div class="form-outline mb-4">
@@ -35,21 +41,24 @@
               type="password"
               class="form-control form-control-lg"
               placeholder="Enter again new password"
-              v-model="user.rePassword"
+              v-model="rePassword"
             />
 
             <span
               class="span-noti"
-              v-if="$v.user.rePassword.$dirty && !$v.user.rePassword.required"
+              v-if="$v.rePassword.$dirty && !$v.rePassword.required"
             >
               Re Password is not empty</span
             >
-            <span
-              class="span-noti"
-              v-else-if="!$v.user.rePassword.sameAsPassword"
-            >
+            <span class="span-noti" v-else-if="!$v.rePassword.sameAsPassword">
               Passwords must be identical</span
             >
+            <span
+              class="span-noti"
+              v-else-if="!$v.rePassword.maxLength || !$v.rePassword.minLength"
+            >
+              Password must be from 8 to 15 characters
+            </span>
           </div>
           <div class="text-center text-lg-start mt-4 pt-2">
             <button
@@ -65,61 +74,50 @@
             </p>
           </div>
         </form>
+        <h2 v-else>Token không hợp lệ hoặc đã hết hạn!</h2>
       </div>
     </div>
   </div>
 </template>
 <script>
-import { jwtDecode } from 'jwt-decode'
 import { required, sameAs } from 'vuelidate/lib/validators'
 import { updatePassApi } from '@/apis/users'
+import maxLength from 'vuelidate/lib/validators/maxLength'
+import minLength from 'vuelidate/lib/validators/minLength'
+import { checkTokenEmail } from '@/apis/auth'
 
 export default {
   data() {
     return {
       checkTime: false,
-      userDecode: '',
-      user: {
-        password: '',
-        rePassword: '',
-      },
+      password: '',
+      rePassword: '',
+      token: null,
     }
   },
-  mounted() {
-    this.checkToken()
+  async mounted() {
+    const token = this.$route.query.token
+    if (token) {
+      const check = await this.checkToken(token)
+      if (check) {
+        this.token = token
+      }
+    }
   },
   methods: {
-    checkToken() {
-      const token = this.$route.query.token
-      if (!token) {
-        this.redirectToErrorPage()
-        return
-      }
-
-      try {
-        this.userDecode = jwtDecode(token)
-        const currentTime = Math.floor(Date.now() / 1000)
-        const expirationTime = this.userDecode.exp
-
-        if (expirationTime < currentTime) {
-          this.redirectToErrorPage()
-        }
-      } catch (error) {
-        this.redirectToErrorPage()
-      }
-    },
     redirectToErrorPage() {
       this.$router.push('/404')
     },
+    async checkToken(token) {
+      return await checkTokenEmail(token)
+    },
     async handleReset() {
-      this.$v.user.$touch()
-      if (!this.$v.user.$invalid) {
-        const { user_id } = this.userDecode.data
-        const user = {
-          user_id,
-          password: this.user.password,
-        }
-        const update = updatePassApi(user)
+      this.$v.$touch()
+      if (!this.$v.$invalid) {
+        const update = await updatePassApi({
+          password: this.password,
+          token: this.token,
+        })
         if (update) {
           alert('Updated password successly!')
           this.$router.push('/login')
@@ -128,12 +126,12 @@ export default {
     },
   },
   validations: {
-    user: {
-      password: { required },
-      rePassword: {
-        required,
-        sameAsPassword: sameAs('password'),
-      },
+    password: { required, maxLength: maxLength(15), minLength: minLength(8) },
+    rePassword: {
+      required,
+      maxLength: maxLength(15),
+      minLength: minLength(8),
+      sameAsPassword: sameAs('password'),
     },
   },
 }

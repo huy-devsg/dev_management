@@ -32,6 +32,9 @@
             <span class="span-noti" v-else-if="!$v.user.email.email">
               Email must be valid</span
             >
+            <span class="span-noti" v-else-if="!$v.user.email.maxLength">
+              Email limit is 35 characters</span
+            >
           </div>
 
           <!-- Password input -->
@@ -49,6 +52,14 @@
               v-if="$v.user.password.$dirty && !$v.user.password.required"
             >
               Password is not empty</span
+            >
+            <span
+              class="span-noti"
+              v-else-if="
+                !$v.user.password.maxLength || !$v.user.password.minLength
+              "
+            >
+              Password must be from 8 to 15 characters</span
             >
           </div>
 
@@ -93,11 +104,10 @@
 </template>
 <script>
 import { mapActions } from 'vuex'
-import authMixin from '../mixins/authMixin.js'
-import { jwtDecode } from 'jwt-decode'
 import { userLoginApi } from '../apis/auth.js'
-
 import { required, email } from 'vuelidate/lib/validators'
+import maxLength from 'vuelidate/lib/validators/maxLength.js'
+import minLength from 'vuelidate/lib/validators/minLength.js'
 
 export default {
   data() {
@@ -110,25 +120,19 @@ export default {
   },
   validations: {
     user: {
-      email: { email, required },
-      password: { required },
+      email: { email, required, maxLength: maxLength(35) },
+      password: { required, maxLength: maxLength(15), minLength: minLength(8) },
     },
   },
-  mixins: [authMixin],
   methods: {
-    ...mapActions(['setLogin', 'setUser']),
-
+    ...mapActions(['setLogin']),
     async handleLogin() {
       this.$v.user.$touch()
       if (!this.$v.user.$invalid) {
         const login = await userLoginApi(this.user)
         if (login) {
           alert('Login success')
-          const accessToken = localStorage.getItem('accessToken')
-          const decode = jwtDecode(accessToken)
-          const { user_id } = decode.data
           this.setLogin(true)
-          this.setUser(user_id)
           this.$router.push('/')
         } else {
           alert('Login failed')

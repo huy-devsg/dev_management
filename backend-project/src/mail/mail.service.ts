@@ -4,6 +4,7 @@ import { CreateMailDto } from './dto/create-mail.dto';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { jwtConstants } from 'src/auth/constants/jwtConstants';
 
 @Injectable()
 export class MailService {
@@ -23,11 +24,28 @@ export class MailService {
         },
       });
       if (user) {
+        const checkIsUpdate = await this.prisma.user_reset_password.findFirst({
+          where: {
+            user_id: user.user_id,
+            is_update: true,
+          },
+        });
+
+        if (checkIsUpdate) {
+          await this.prisma.user_reset_password.update({
+            where: {
+              user_id: user.user_id,
+            },
+            data: {
+              is_update: false,
+            },
+          });
+        }
         const token = this.jwtService.sign(
           { data: { user_id: user.user_id, email } },
           {
-            expiresIn: this.configService.get('EXPIRES_IN_RESET'),
-            secret: this.configService.get('SECRET_KEY_RESET'),
+            expiresIn: jwtConstants.expiresIn.resetPass,
+            secret: jwtConstants.secret.resetPass,
           },
         );
         const text = `Dear ${email},

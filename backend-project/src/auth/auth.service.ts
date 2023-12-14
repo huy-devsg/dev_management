@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { jwtConstants } from './constants/jwtConstants';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,6 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
   prisma = new PrismaClient();
-
   async login(body: loginDTO) {
     const { email, password } = body;
     try {
@@ -32,10 +32,10 @@ export class AuthService {
           return { status: 401, message: 'Sai password' };
         } else {
           const token = this.jwtService.sign(
-            { data: { user_id: user.user_id, email } },
+            { user_id: user.user_id, email },
             {
-              expiresIn: this.configService.get('EXPIRES_IN'),
-              secret: this.configService.get('SECRET_KEY'),
+              expiresIn: jwtConstants.expiresIn.login,
+              secret: jwtConstants.secret.login,
             },
           );
           return {
@@ -74,6 +74,40 @@ export class AuthService {
       }
     } catch (err) {
       throw new Error(`Error creating user: ${err}`);
+    }
+  }
+  async checkToken(req, secret) {
+    try {
+      if (secret === 'login') {
+        secret = jwtConstants.secret.login;
+      } else {
+        secret = jwtConstants.secret.resetPass;
+      }
+      const token = req.headers.authorization?.split(' ')[1];
+
+      if (!token) {
+        return { status: 400, token: false };
+      }
+      const decodedToken = await this.jwtService.verifyAsync(token, { secret });
+      if (decodedToken) {
+        const { user_id } = decodedToken;
+        if (secret === 'SECRET_RESET') {
+          const checkIsUpdate = await this.prisma.user_reset_password.findFirst(
+            {
+              where: {
+                user_id,
+                is_update: true,
+              },
+            },
+          );
+          if (checkIsUpdate) {
+            return { status: 400, token: false };
+          }
+        }
+        return { status: 200, token: true };
+      }
+    } catch (error) {
+      return { status: 400, token: false };
     }
   }
 }

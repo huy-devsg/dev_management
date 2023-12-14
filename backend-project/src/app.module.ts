@@ -5,7 +5,6 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from './auth/constants/jwtConstants';
 import { MailModule } from './mail/mail.module';
 @Module({
   imports: [
@@ -15,8 +14,6 @@ import { MailModule } from './mail/mail.module';
     }),
     JwtModule.register({
       global: true,
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: process.env.EXPIRES_IN },
     }),
 
     UsersModule,
