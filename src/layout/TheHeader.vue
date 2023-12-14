@@ -44,18 +44,18 @@
             aria-expanded="false"
           >
             <div class="nav-profile-img">
-              <img :src="getUser.avatar" alt="image" />
+              <img :src="user.avatar" alt="image" />
               <span class="availability-status online"></span>
             </div>
             <div class="nav-profile-text">
-              <p class="mb-1 text-black">{{ getUser.full_name }}</p>
+              <p class="mb-1 text-black">{{ user.full_name }}</p>
             </div>
           </a>
           <div
             class="dropdown-menu navbar-dropdown"
             aria-labelledby="profileDropdown"
           >
-            <router-link to="/login" class="dropdown-item" @click="login">
+            <router-link to="/login" class="dropdown-item">
               <i class="mdi mdi-account mr-2 text-success"></i> User Information
             </router-link>
 
@@ -250,24 +250,43 @@
 </template>
 
 <script>
+import { getUserById } from '@/apis/users'
 import { mapActions, mapGetters } from 'vuex'
 export default {
+  data() {
+    return {
+      user: '',
+    }
+  },
   computed: {
-    ...mapGetters(['getIsLogin', 'getUser']),
+    ...mapGetters(['getIsLogin']),
+  },
+  created() {
+    this.fetchUserData()
   },
   methods: {
     ...mapActions({
       isModal: 'openModal',
     }),
-    login() {
-      console.log(this.getIsLogin)
+    async fetchUserData() {
+      if (this.getIsLogin) {
+        this.user = await getUserById()
+      }
     },
-    register() {
-      console.log('register')
-    },
+
     signout() {
-      localStorage.clear('accessToken')
-      window.location.reload()
+      if (confirm('Bạn chắc chắn muốn đăng xuất ?')) {
+        localStorage.clear('accessToken')
+        window.location.reload()
+      }
+    },
+  },
+  watch: {
+    getIsLogin(newValue) {
+      console.log('newValue: ', newValue)
+      if (newValue) {
+        this.fetchUserData()
+      }
     },
   },
 }

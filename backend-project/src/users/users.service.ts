@@ -3,9 +3,19 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { JwtStrategy } from 'src/auth/stagegy/jwtStragegy';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from 'src/auth/authGuard';
+import { jwtConstants } from 'src/auth/constants/jwtConstants';
 
 @Injectable()
 export class UsersService {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
+  ) {}
+  jwtStrategy = new JwtStrategy();
   prisma = new PrismaClient();
   private selectInfoUser = {
     email: true,
@@ -84,9 +94,19 @@ export class UsersService {
         where: {
           is_delete: false,
         },
+<<<<<<< HEAD
 
         select: {
           ...this.selectInfoUser,
+=======
+        select: {
+          email: true,
+          full_name: true,
+          avatar: true,
+          gender: true,
+          role: true,
+          desc: true,
+>>>>>>> master
           user_language: {
             include: {
               language: true,
@@ -107,7 +127,16 @@ export class UsersService {
           is_delete: false,
         },
         select: {
+<<<<<<< HEAD
           ...this.selectInfoUser,
+=======
+          email: true,
+          full_name: true,
+          avatar: true,
+          gender: true,
+          role: true,
+          desc: true,
+>>>>>>> master
           user_language: {
             include: {
               language: true,
@@ -115,7 +144,6 @@ export class UsersService {
           },
         },
       });
-
       return data;
     } catch {
       throw new Error();
@@ -141,7 +169,6 @@ export class UsersService {
       throw new Error();
     }
   }
-
   async updateUser(id: number, body: UpdateUserDto) {
     try {
       const data = await this.handleUser(id, body);
@@ -150,12 +177,48 @@ export class UsersService {
       throw new Error();
     }
   }
-  async updatePassword(body: any) {
-    const { user_id, password } = body;
+  async updatePassword(user) {
+    const { token, password } = user;
+    console.log('token: ', token);
+    const secret = jwtConstants.secret.resetPass;
+    const validatedUser = await this.jwtStrategy.validate(token, secret);
+    console.log('validatedUser: ', validatedUser);
+    const { user_id } = validatedUser;
     const passBcrypt: string = await bcrypt.hash(password, 10);
-
     try {
-      const data = await this.prisma.users.update({
+      if (!validatedUser) {
+        return {
+          status: 400,
+          message: 'Token has been used!',
+        };
+      }
+      const checkIsUpdate = await this.prisma.user_reset_password.findFirst({
+        where: {
+          user_id,
+        },
+      });
+      const currentDate = new Date();
+
+      if (!checkIsUpdate) {
+        await this.prisma.user_reset_password.create({
+          data: {
+            user_id,
+            is_update: true,
+            updateAt: currentDate,
+          },
+        });
+      } else {
+        await this.prisma.user_reset_password.update({
+          where: {
+            user_id,
+          },
+          data: {
+            is_update: true,
+            updateAt: currentDate,
+          },
+        });
+      }
+      const res = await this.prisma.users.update({
         where: {
           user_id,
         },
@@ -168,9 +231,7 @@ export class UsersService {
         status: 200,
         message: 'Updated password successly!',
       };
-    } catch {
-      throw new Error();
-    }
+    } catch {}
   }
   async removeUser(id: number) {
     try {

@@ -1,5 +1,5 @@
 <template>
-  <tbody>
+  <tbody v-if="getIsLogin">
     <UserItem
       v-for="(userItem, index) in displayedUsers"
       :key="index"
@@ -22,24 +22,24 @@ export default {
     UserItem,
   },
   computed: {
-    ...mapGetters(['getUserList', 'searchValue']),
+    ...mapGetters(['getUserList', 'searchValue', 'getIsLogin']),
     displayedUsers() {
       return this.searchValue ? this.filteredUsers : this.getUserList
     },
     filteredUsers() {
       return this.getUserList.filter((user) =>
-        user.full_name.toLowerCase().includes(this.searchValue.toLowerCase())
+        user.full_name.toLowerCase().includes(this.searchValue)
       )
     },
   },
 
   created() {
-    this.fetchUserApi()
+    if (this.getIsLogin) {
+      this.fetchUserApi()
+    }
   },
   methods: {
-    ...mapActions({
-      fetchUserApi: 'fetchUserApi',
-    }),
+    ...mapActions(['fetchUserApi']),
   },
 }
 </script>

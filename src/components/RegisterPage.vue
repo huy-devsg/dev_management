@@ -28,6 +28,9 @@
             <span class="span-noti" v-else-if="!$v.userForm.email.email">
               Email must be valid</span
             >
+            <span class="span-noti" v-else-if="!$v.userForm.email.maxLength">
+              Full name limit is 35 characters
+            </span>
           </div>
           <label class="form-label">Full Name :</label>
           <div class="form-outline mb-4">
@@ -44,6 +47,12 @@
               "
             >
               Full name is not empty
+            </span>
+            <span
+              class="span-noti"
+              v-else-if="!$v.userForm.full_name.maxLength"
+            >
+              Full name limit is 50 characters
             </span>
           </div>
 
@@ -62,6 +71,15 @@
               "
             >
               Password is not empty
+            </span>
+            <span
+              class="span-noti"
+              v-else-if="
+                !$v.userForm.password.maxLength ||
+                !$v.userForm.password.minLength
+              "
+            >
+              Password must be from 8 to 15 characters
             </span>
           </div>
 
@@ -88,7 +106,7 @@
                   type="radio"
                   class="form-check-input"
                   name="gender"
-                  value="Male"
+                  :value="true"
                   v-model="userForm.gender"
                 />
                 Male <i class="input-helper"></i>
@@ -100,7 +118,7 @@
                   type="radio"
                   class="form-check-input"
                   name="gender"
-                  value="Female"
+                  :value="false"
                   v-model="userForm.gender" />
                 Female <i class="input-helper"></i
               ></label>
@@ -133,9 +151,10 @@
 </template>
 
 <script>
-import authMixin from '@/mixins/authMixin'
 import { registerUserApi } from '@/apis/auth'
 import { required, email } from 'vuelidate/lib/validators'
+import maxLength from 'vuelidate/lib/validators/maxLength'
+import minLength from 'vuelidate/lib/validators/minLength'
 
 export default {
   data() {
@@ -151,18 +170,18 @@ export default {
   },
   validations: {
     userForm: {
-      email: { email, required },
+      email: { email, required, maxLength: maxLength(35) },
       full_name: {
         required,
+        maxLength: maxLength(50),
       },
       avatar: {
         required,
       },
       gender: { required },
-      password: { required },
+      password: { required, maxLength: maxLength(15), minLength: minLength(8) },
     },
   },
-  mixins: [authMixin],
   methods: {
     async handleRegister() {
       this.$v.userForm.$touch()
@@ -171,7 +190,7 @@ export default {
           const register = await registerUserApi(this.userForm)
           if (register) {
             alert('Register success')
-            this.$router.push('/')
+            this.$router.push('/login')
           } else {
             alert('Register failed')
           }

@@ -28,7 +28,6 @@
 </template>
 
 <script>
-import authMixin from '@/mixins/authMixin'
 import SearchBar from './SearchBar.vue'
 import UserList from './UserList.vue'
 export default {
@@ -41,7 +40,6 @@ export default {
     SearchBar,
     UserList,
   },
-  mixins: [authMixin],
 }
 </script>
 

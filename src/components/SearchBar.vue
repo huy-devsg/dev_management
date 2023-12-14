@@ -25,13 +25,17 @@ export default {
   data() {
     return {
       keyword: '',
+      timeoutId: null,
     }
   },
   methods: {
     ...mapActions(['setKeyWord']),
     handleSearch(event) {
       this.keyword = event.target.value
-      this.setKeyWord(this.keyword)
+      clearTimeout(this.timeoutId)
+      this.timeoutId = setTimeout(() => {
+        this.setKeyWord(this.keyword)
+      }, 1000)
     },
   },
 }

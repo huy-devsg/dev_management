@@ -30,13 +30,6 @@
       >
         <i class="mdi mdi-delete btn-icon-prepend"></i> Remove
       </button>
-      <button
-        type="button"
-        class="mr-2 btn btn-gradient-danger btn-icon-text"
-        @click="handleRemoveUser(user.user_id)"
-      >
-        <i class="mdi mdi-email-outline"></i>
-      </button>
     </td>
     <div>
       <AppModal v-if="openModal">

@@ -53,8 +53,6 @@
   </div>
 </template>
 <script>
-import authMixin from '../mixins/authMixin.js'
-
 import { required, email } from 'vuelidate/lib/validators'
 import { sendMailReset } from '@/apis/resetPass.js'
 
@@ -71,7 +69,6 @@ export default {
       email: { email, required },
     },
   },
-  mixins: [authMixin],
   methods: {
     async handleReset() {
       this.$v.user.$touch()
