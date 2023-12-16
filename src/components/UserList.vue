@@ -38,6 +38,7 @@ export default {
       this.fetchUserApi()
     }
   },
+
   methods: {
     ...mapActions(['fetchUserApi']),
   },

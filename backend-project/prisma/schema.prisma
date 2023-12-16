@@ -11,12 +11,12 @@ model users {
   user_id             Int                  @id @default(autoincrement())
   email               String?              @db.VarChar(255)
   full_name           String?              @db.VarChar(255)
-  avatar              String?              @db.VarChar(255)
   password            String?              @db.VarChar(255)
   gender              Boolean?
   role                String?              @default("client") @db.VarChar(255)
   desc                String?              @db.VarChar(255)
   is_delete           Boolean?             @default(false)
+  user_avatar         user_avatar?
   user_language       user_language[]
   user_reset_password user_reset_password?
 }
@@ -41,6 +41,13 @@ model user_language {
 model user_reset_password {
   user_id   Int       @id
   is_update Boolean?
-  updateAt  DateTime? @db.DateTime(0)
+  updateAt  DateTime? @db.Timestamp(0)
+  token     String?   @db.LongText
   users     users     @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "user_reset_password_ibfk_1")
+}
+
+model user_avatar {
+  user_id     Int     @id
+  avatar_link String? @db.LongText
+  users       users   @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "user_avatar_ibfk_1")
 }

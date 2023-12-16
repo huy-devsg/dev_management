@@ -2,6 +2,7 @@ import { registerUserApi } from '@/apis/auth'
 import {
   createUserApi,
   getAllUserApi,
+  getLinkAvatarApi,
   removeUserApi,
   updateUserApi,
 } from '@/apis/users'
@@ -45,6 +46,15 @@ const actions = {
       throw Error(error)
     }
   },
+  async getAvatarUser({ commit }) {
+    try {
+      const newUser = await getLinkAvatarApi()
+      commit('ADD_USER', newUser)
+      this.dispatch('fetchUserApi')
+    } catch (err) {
+      throw Error(err)
+    }
+  },
   async createUser({ commit }, userInfo) {
     try {
       const newUser = await createUserApi(userInfo)
@@ -66,6 +76,7 @@ const actions = {
   async updateUser({ commit }, user) {
     try {
       const res = await updateUserApi(user)
+      console.log('res update: ', res)
       commit('UPDATE_USER', user)
       this.dispatch('fetchUserApi')
       return res

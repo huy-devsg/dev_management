@@ -31,6 +31,7 @@ CREATE TABLE `user_reset_password` (
   `user_id` int NOT NULL,
   `is_update` tinyint(1) DEFAULT NULL,
   `updateAt` datetime DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   CONSTRAINT `user_reset_password_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -47,7 +48,7 @@ CREATE TABLE `users` (
   `desc` varchar(255) DEFAULT NULL,
   `is_delete` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `language` (`language_id`, `language_name`) VALUES
 (1, 'JavaScript');
@@ -64,15 +65,16 @@ INSERT INTO `user_language` (`id`, `user_id`, `language_id`) VALUES
 (114, 35, 1);
 
 
-INSERT INTO `user_reset_password` (`user_id`, `is_update`, `updateAt`) VALUES
-(10, 1, NULL);
+INSERT INTO `user_reset_password` (`user_id`, `is_update`, `updateAt`, `token`) VALUES
+(10, 1, '2023-12-14 10:34:35', '$2b$10$9ug7b.Skb4GSHzhmu9khZuCW3h6aHeePtuy5Qn8KwxMtbLMT6XGle');
 
 
 INSERT INTO `users` (`user_id`, `email`, `full_name`, `avatar`, `password`, `gender`, `role`, `desc`, `is_delete`) VALUES
-(10, 'huy656363@gmail.com', 'Nguyễn Thanh Huy', 'https://cdn1.vectorstock.com/i/1000x1000/61/50/avatar-business-man-graphic-vector-9646150.jpg', '$2b$10$GkxlbNjP/apYP7Vc9O0CV.FoCCCpzMC/7u62hc5QJcevkbo2TYvXm', 1, 'admin', 'kkkkkk', 0);
+(10, 'huy656363@gmail.com', 'Nguyễn Thanh Huy', 'https://cdn1.vectorstock.com/i/1000x1000/61/50/avatar-business-man-graphic-vector-9646150.jpg', '$2b$10$6heMhgnGvw7RMr4XnDsPjO.r7bevWniGrEES0wzPivhd976w62Ho6', 1, 'admin', 'kkkkkk', 0);
 INSERT INTO `users` (`user_id`, `email`, `full_name`, `avatar`, `password`, `gender`, `role`, `desc`, `is_delete`) VALUES
 (35, 'huy656363@gmail.com', 'Nguyễn Thanh Huy', 'https://cdn1.vectorstock.com/i/1000x1000/61/50/avatar-business-man-graphic-vector-9646150.jpg', NULL, 1, 'admin', 'kkkkkk', 0);
-
+INSERT INTO `users` (`user_id`, `email`, `full_name`, `avatar`, `password`, `gender`, `role`, `desc`, `is_delete`) VALUES
+(36, 'huy686363@gmail.com', 'Nguyễn Văn C', 'https://tse3.mm.bing.net/th?id=OIP.sFfm-4yO9NcweYdDTLRIrQAAAA&pid=Api&P=0&h=180', '$2b$10$MOQJzvxxvbwUycX6ygSM6uH4VYTRWUINHF4p3qkhMhESkwgs1N60q', 1, 'client', NULL, 0);
 
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

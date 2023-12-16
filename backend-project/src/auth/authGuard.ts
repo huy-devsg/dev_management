@@ -20,7 +20,6 @@ export class JwtAuthGuard implements CanActivate {
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
-      console.log('token: ', token);
       if (!token) {
         throw new UnauthorizedException();
       }
@@ -28,7 +27,6 @@ export class JwtAuthGuard implements CanActivate {
       try {
         const secret = jwtConstants.secret.login;
         const validatedUser = await this.jwtStrategy.validate(token, secret);
-        console.log('validatedUser: ', validatedUser);
         request['user'] = validatedUser;
       } catch {
         throw new UnauthorizedException('Token invalid');

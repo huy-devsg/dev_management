@@ -43,11 +43,12 @@
         <div class="form-group">
           <label for="avatar">Avatar</label>
           <input
-            type="text"
+            type="file"
             class="form-control"
             id="avatar"
             placeholder="avatar"
-            v-model="userForm.avatar"
+            multiple
+            @change="($event) => handleAvatar($event)"
           />
           <span
             class="span-noti"
@@ -137,7 +138,7 @@
                   class="form-check-input"
                   name="gender"
                   id="gender"
-                  value="Male"
+                  :value="true"
                   v-model="userForm.gender" />
                 Male <i class="input-helper"></i
               ></label>
@@ -149,21 +150,9 @@
                   class="form-check-input"
                   name="gender"
                   id="gender"
-                  value="Female"
+                  :value="false"
                   v-model="userForm.gender" />
                 Female <i class="input-helper"></i
-              ></label>
-            </div>
-            <div class="form-check mr-3">
-              <label class="form-check-label">
-                <input
-                  type="radio"
-                  class="form-check-input"
-                  name="gender"
-                  id="gender"
-                  value="Khác"
-                  v-model="userForm.gender" />
-                Other <i class="input-helper"></i
               ></label>
             </div>
           </div>
@@ -215,6 +204,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import { required, email } from 'vuelidate/lib/validators'
+import { uploadAvatarApiById } from '@/apis/users'
 
 export default {
   data() {
@@ -227,6 +217,9 @@ export default {
         language: [],
         role: '',
         desc: '',
+      },
+      file: {
+        formData: null,
       },
     }
   },
@@ -245,20 +238,39 @@ export default {
   },
   computed: {
     ...mapGetters(['getUserEdit']),
+    handleFile(file, formData) {
+      return (file = {
+        file,
+        formData,
+      })
+    },
   },
   methods: {
-    submitForm() {
+    handleAvatar(event) {
+      const selectedFile = event.target.files[0]
+      console.log('selectedFile: ', selectedFile)
+      const formData = new FormData()
+      formData.append('avatar', selectedFile)
+      this.file.formData = formData
+      this.userForm.avatar = event.target.value
+    },
+    async submitForm() {
       this.$v.userForm.$touch()
       if (!this.$v.userForm.$invalid) {
         if (this.getUserEdit) {
           if (confirm('Bạn chắc chắn muốn cập nhật thông tin user ?')) {
-            this.handleUpdateUser(this.userForm)
+            await this.handleUpdateUser(this.userForm)
+            await uploadAvatarApiById(
+              this.file.formData,
+              this.getUserEdit.user_id
+            )
+
             this.resetForm()
             this.openModal()
           }
         } else {
           if (confirm('Bạn chắc chắn muốn thêm user ?')) {
-            this.handleAddUser(this.userForm)
+            await this.handleAddUser(this.userForm)
             this.resetForm()
             this.openModal()
           }
@@ -275,6 +287,7 @@ export default {
   created() {
     if (this.getUserEdit) {
       this.userForm = { ...this.getUserEdit }
+      console.log('this.userForm: ', this.userForm)
       this.userForm.language =
         this.userForm.user_language?.map((item) => item.language.language_id) ||
         []

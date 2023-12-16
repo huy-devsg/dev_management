@@ -12,11 +12,7 @@ export const userLoginApi = async (user) => {
 }
 export const registerUserApi = async (user) => {
   const res = await axios.post(`${BASE_URL}/api/auth/register`, user)
-  if (res.status === 201) {
-    return true
-  } else {
-    return false
-  }
+  return res.data
 }
 export const checkLogin = async () => {
   const token = localStorage.getItem('accessToken')

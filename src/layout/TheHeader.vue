@@ -261,8 +261,10 @@ export default {
   computed: {
     ...mapGetters(['getIsLogin']),
   },
-  created() {
-    this.fetchUserData()
+  async created() {
+    if (this.getIsLogin) {
+      this.fetchUserData()
+    }
   },
   methods: {
     ...mapActions({

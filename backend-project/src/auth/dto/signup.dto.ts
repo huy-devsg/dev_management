@@ -19,10 +19,6 @@ export class signupDTO {
 
   @ApiProperty()
   @IsNotEmpty()
-  avatar: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
   gender: boolean;
 
   @ApiProperty()

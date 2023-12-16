@@ -8,6 +8,10 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from 'src/auth/authGuard';
 import { jwtConstants } from 'src/auth/constants/jwtConstants';
+import { v4 as uuidv4 } from 'uuid';
+import { UploadAvatar } from './dto/update-avatar.dto';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class UsersService {
@@ -30,7 +34,7 @@ export class UsersService {
     body: CreateUserDto | UpdateUserDto,
   ) {
     try {
-      const { email, full_name, avatar, gender, role, desc, language } = body;
+      const { email, full_name, gender, role, desc, language } = body;
 
       const data = id
         ? await this.prisma.users.update({
@@ -40,7 +44,6 @@ export class UsersService {
             data: {
               email,
               full_name,
-              avatar,
               gender,
               role,
               desc,
@@ -51,7 +54,6 @@ export class UsersService {
             data: {
               email,
               full_name,
-              avatar,
               gender,
               role,
               desc,
@@ -94,11 +96,10 @@ export class UsersService {
         where: {
           is_delete: false,
         },
-
         select: {
+          user_id: true,
           email: true,
           full_name: true,
-          avatar: true,
           gender: true,
           role: true,
           desc: true,
@@ -122,9 +123,9 @@ export class UsersService {
           is_delete: false,
         },
         select: {
+          user_id: true,
           email: true,
           full_name: true,
-          avatar: true,
           gender: true,
           role: true,
           desc: true,
@@ -170,10 +171,8 @@ export class UsersService {
   }
   async updatePassword(user) {
     const { token, password } = user;
-    console.log('token: ', token);
     const secret = jwtConstants.secret.resetPass;
     const validatedUser = await this.jwtStrategy.validate(token, secret);
-    console.log('validatedUser: ', validatedUser);
     const { user_id } = validatedUser;
     const passBcrypt: string = await bcrypt.hash(password, 10);
     try {
@@ -189,16 +188,10 @@ export class UsersService {
         },
       });
       const currentDate = new Date();
+      const randomTokenId = uuidv4();
+      const tokenBcrypt: string = await bcrypt.hash(randomTokenId, 10);
 
-      if (!checkIsUpdate) {
-        await this.prisma.user_reset_password.create({
-          data: {
-            user_id,
-            is_update: true,
-            updateAt: currentDate,
-          },
-        });
-      } else {
+      if (checkIsUpdate) {
         await this.prisma.user_reset_password.update({
           where: {
             user_id,
@@ -206,6 +199,7 @@ export class UsersService {
           data: {
             is_update: true,
             updateAt: currentDate,
+            token: tokenBcrypt,
           },
         });
       }
@@ -236,7 +230,99 @@ export class UsersService {
       });
       return data;
     } catch {
-      throw new Error();
+      return {
+        status: 400,
+        message: 'Update password Error!',
+      };
     }
+  }
+  async uploadAvatar(userId, file, pictureUrl) {
+    console.log('pictureUrl: ', pictureUrl);
+    console.log('file: ', file);
+    console.log('userId upload: ', userId);
+    try {
+      const isAvatar = await this.prisma.user_avatar.findMany({
+        where: {
+          user_id: userId,
+        },
+      });
+      let data = null;
+      if (!isAvatar) {
+        pictureUrl = 'images/' + pictureUrl;
+        data = await this.prisma.user_avatar.create({
+          data: {
+            user_id: userId,
+            avatar_link: pictureUrl,
+          },
+        });
+      } else {
+        data = await this.prisma.user_avatar.update({
+          where: {
+            user_id: userId,
+          },
+          data: {
+            user_id: userId,
+            avatar_link: pictureUrl,
+          },
+        });
+      }
+      return { data };
+    } catch {
+      throw new Error('Failed to upload picture.');
+    }
+  }
+
+  async uploadAvataByUserId(userId, file, pictureUrl) {
+    console.log('pictureUrl: ', pictureUrl);
+    console.log('file: ', file);
+    console.log('userId upload: ', userId);
+    try {
+      const isAvatar = await this.prisma.user_avatar.findMany({
+        where: {
+          user_id: userId,
+        },
+      });
+      let data = null;
+      if (!isAvatar) {
+        pictureUrl = 'images/' + pictureUrl;
+        data = await this.prisma.user_avatar.create({
+          data: {
+            user_id: userId,
+            avatar_link: pictureUrl,
+          },
+        });
+      } else {
+        data = await this.prisma.user_avatar.update({
+          where: {
+            user_id: userId,
+          },
+          data: {
+            user_id: userId,
+            avatar_link: pictureUrl,
+          },
+        });
+      }
+      return { data };
+    } catch {
+      throw new Error('Failed to upload picture.');
+    }
+  }
+
+  async linkAvatar(user_id) {
+    try {
+      const data = await this.prisma.user_avatar.findFirst({
+        select: {
+          avatar_link: true,
+        },
+        where: {
+          user_id,
+        },
+      });
+      return { data };
+    } catch {}
+  }
+  getBase64Avatar(body: any) {
+    const { name } = body;
+    return readFileSync(join(process.cwd(), '/public/images/' + name));
   }
 }

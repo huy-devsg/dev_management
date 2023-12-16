@@ -17,7 +17,14 @@ export const getAllUserApi = async () => {
       createAxiosInstance()
     }
     const res = await instance.get(`${BASE_URL}/api/users/getListUser`)
-    return res.data
+    const users = res.data
+
+    const userWithAvatarPromises = users.map(async (user) => {
+      const avatar = await getLinkAvatarById(user.user_id)
+      return { ...user, avatar }
+    })
+    const usersWithAvatar = await Promise.all(userWithAvatarPromises)
+    return usersWithAvatar
   } catch (error) {
     throw new Error(error)
   }
@@ -28,7 +35,94 @@ export const getUserById = async () => {
       createAxiosInstance()
     }
     const res = await instance.get(`${BASE_URL}/api/users/getUserById`)
-    return res.data
+    return { ...res.data, avatar: await getLinkAvatarApi() }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+const getAvatarName = async () => {
+  try {
+    if (!instance) {
+      createAxiosInstance()
+    }
+    const res = await instance.get(`${BASE_URL}/api/users/getLinkAvatar`)
+    return res.data.data.avatar_link
+  } catch (err) {
+    throw new Error(err)
+  }
+}
+const getLinkAvatarById = async (userId) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/api/users/getLinkAvatar/${userId}`)
+    const avatarName = res.data.data.avatar_link
+    const getBase = await axios.post(`${BASE_URL}/api/users/getFile`, {
+      name: avatarName,
+    })
+    const bytes = new Uint8Array(getBase.data.data)
+    const binary = bytes.reduce(
+      (data, b) => (data += String.fromCharCode(b)),
+      ''
+    )
+    const imgSrc = 'data:image/jpeg;base64,' + btoa(binary)
+    return imgSrc
+  } catch {
+    throw new Error()
+  }
+}
+export const getLinkAvatarApi = async () => {
+  try {
+    const getName = await getAvatarName()
+    if (getName) {
+      if (!instance) {
+        createAxiosInstance()
+      }
+      const res = await instance.post(`${BASE_URL}/api/users/getFile`, {
+        name: getName,
+      })
+      const bytes = new Uint8Array(res.data.data)
+      const binary = bytes.reduce(
+        (data, b) => (data += String.fromCharCode(b)),
+        ''
+      )
+      const imgSrc = 'data:image/jpeg;base64,' + btoa(binary)
+      return imgSrc
+    }
+  } catch {
+    throw new Error()
+  }
+}
+
+export const uploadAvatarApiById = async (formData, userId) => {
+  console.log('formData: ', formData)
+  try {
+    if (!instance) {
+      createAxiosInstance()
+    }
+    const res = await instance.post(
+      `${BASE_URL}/api/users/UploadAvatar/${userId}`,
+      formData
+    )
+    console.log('res uploadAvatarApiById: ', res)
+
+    return res
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+export const uploadAvatarApi = async (formData) => {
+  console.log('formData: ', formData)
+  try {
+    if (!instance) {
+      createAxiosInstance()
+    }
+    const res = await instance.post(
+      `${BASE_URL}/api/users/UploadAvatar`,
+      formData
+    )
+    console.log('res: ', res)
+
+    return res
   } catch (error) {
     throw new Error(error)
   }

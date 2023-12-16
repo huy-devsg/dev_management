@@ -60,18 +60,27 @@ export class AuthService {
           email,
         },
       });
+      console.log('checkEmail: ', checkEmail);
 
       if (!checkEmail) {
         const data = await this.prisma.users.create({
           data: { ...body, password: passBcrypt },
         });
-        return { data };
-      } else {
+        const createAvtClone = await this.prisma.user_avatar.create({
+          data: {
+            user_id: data.user_id,
+            avatar_link: 'no_avatar.jpg',
+          },
+        });
         return {
-          status: 400,
-          message: 'Email đã tồn tại.',
+          status: 201,
+          message: 'Đăng ký thành công.',
         };
       }
+      return {
+        status: 400,
+        message: 'Email đã tồn tại.',
+      };
     } catch (err) {
       throw new Error(`Error creating user: ${err}`);
     }
@@ -84,24 +93,35 @@ export class AuthService {
         secret = jwtConstants.secret.resetPass;
       }
       const token = req.headers.authorization?.split(' ')[1];
-
       if (!token) {
         return { status: 400, token: false };
       }
       const decodedToken = await this.jwtService.verifyAsync(token, { secret });
       if (decodedToken) {
-        const { user_id } = decodedToken;
         if (secret === 'SECRET_RESET') {
-          const checkIsUpdate = await this.prisma.user_reset_password.findFirst(
-            {
-              where: {
-                user_id,
-                is_update: true,
-              },
+          const { user_id, tokenId } = decodedToken;
+
+          const tokenDB = await this.prisma.user_reset_password.findFirst({
+            where: {
+              user_id,
             },
-          );
-          if (checkIsUpdate) {
-            return { status: 400, token: false };
+          });
+          if (tokenDB) {
+            const tokenCompare = await bcrypt.compare(tokenId, tokenDB.token);
+            if (!tokenCompare) {
+              return { status: 400, token: false };
+            }
+          }
+        } else {
+          const { email } = decodedToken;
+          const user = await this.prisma.users.findFirst({
+            where: {
+              email,
+              is_delete: false,
+            },
+          });
+          if (!user) {
+            return { status: 400, message: 'Email không tồn tại' };
           }
         }
         return { status: 200, token: true };

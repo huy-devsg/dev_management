@@ -12,7 +12,7 @@
       }}
     </td>
     <td>
-      {{ user.gender }}
+      {{ user.gender ? 'Male' : 'Female' }}
     </td>
     <td>
       <button
@@ -69,7 +69,6 @@ export default {
       }
     },
   },
-
   components: { AppModal, FormUser },
 }
 </script>

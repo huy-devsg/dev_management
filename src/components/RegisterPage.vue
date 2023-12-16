@@ -29,7 +29,10 @@
               Email must be valid</span
             >
             <span class="span-noti" v-else-if="!$v.userForm.email.maxLength">
-              Full name limit is 35 characters
+              Email limit is 35 characters
+            </span>
+            <span class="span-noti" v-else-if="emailExist">
+              Email already exists
             </span>
           </div>
           <label class="form-label">Full Name :</label>
@@ -83,21 +86,6 @@
             </span>
           </div>
 
-          <label class="form-label">Avatar :</label>
-          <div class="form-outline mb-3">
-            <input
-              type="text"
-              class="form-control form-control-lg"
-              placeholder="Enter avatar link"
-              v-model="userForm.avatar"
-            />
-            <span
-              class="span-noti"
-              v-if="$v.userForm.avatar.$dirty && !$v.userForm.avatar.required"
-            >
-              Avatar is not empty</span
-            >
-          </div>
           <label for="">Gender : </label>
           <div class="d-flex">
             <div class="form-check mr-3">
@@ -159,10 +147,10 @@ import minLength from 'vuelidate/lib/validators/minLength'
 export default {
   data() {
     return {
+      emailExist: false,
       userForm: {
         email: '',
         full_name: '',
-        avatar: '',
         gender: '',
         password: '',
       },
@@ -175,9 +163,7 @@ export default {
         required,
         maxLength: maxLength(50),
       },
-      avatar: {
-        required,
-      },
+
       gender: { required },
       password: { required, maxLength: maxLength(15), minLength: minLength(8) },
     },
@@ -188,9 +174,11 @@ export default {
       if (!this.$v.userForm.$invalid) {
         if (confirm('Comfirm register ?')) {
           const register = await registerUserApi(this.userForm)
-          if (register) {
+          if (register.status === 201) {
             alert('Register success')
             this.$router.push('/login')
+          } else if (register.status === 400) {
+            this.emailExist = true
           } else {
             alert('Register failed')
           }
