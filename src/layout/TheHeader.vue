@@ -55,7 +55,7 @@
             class="dropdown-menu navbar-dropdown"
             aria-labelledby="profileDropdown"
           >
-            <router-link to="/login" class="dropdown-item">
+            <router-link to="/profile" class="dropdown-item">
               <i class="mdi mdi-account mr-2 text-success"></i> User Information
             </router-link>
 
