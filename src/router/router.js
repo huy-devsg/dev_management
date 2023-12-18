@@ -7,6 +7,7 @@ import RegisterPage from '@/components/RegisterPage.vue'
 import ResetPassword from '@/components/ResetPassword.vue'
 import ChangeNewPass from '@/components/ChangeNewPass.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
+import UserProfile from '@/components/UserProfile.vue'
 import { checkLogin } from '@/apis/auth'
 import store from '../store/store.js'
 Vue.use(VueRouter)
@@ -16,6 +17,11 @@ const routes = [
     path: '',
     component: MainLayout,
     children: [{ path: '', component: TheDashboard }],
+  },
+  {
+    path: '/profile',
+    component: MainLayout,
+    children: [{ path: '', component: UserProfile }],
   },
   {
     path: '/login',
@@ -52,6 +58,7 @@ router.beforeEach(async (to, from, next) => {
     '/reset-password',
     '/reset-password/new',
   ]
+  const needLogin = ['/', '/profile']
   const isPublicPage = publicPages.includes(to.path)
   const isLoggedIn = await checkLogin()
   console.log('isLoggedIn: ', isLoggedIn)
@@ -59,12 +66,11 @@ router.beforeEach(async (to, from, next) => {
     await store.dispatch('setLogin', isLoggedIn)
   }
   if (isPublicPage && isLoggedIn) {
-    next('/')
-  } else if (!isPublicPage && !isLoggedIn) {
-    next('/login')
-  } else {
-    next()
+    return next('/')
+  } else if (!isPublicPage && !isLoggedIn && needLogin) {
+    return next('/login')
   }
+  return next()
 })
 
 export default router

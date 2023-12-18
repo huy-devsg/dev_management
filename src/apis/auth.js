@@ -2,8 +2,8 @@ import axios from 'axios'
 const BASE_URL = 'http://localhost:3000'
 export const userLoginApi = async (user) => {
   const res = await axios.post(`${BASE_URL}/api/auth/login`, user)
-  const { accessToken } = res.data
-  if (res.data.status === 201) {
+  const { accessToken, status } = res.data
+  if (status === 201) {
     localStorage.setItem('accessToken', accessToken)
     return true
   } else {
